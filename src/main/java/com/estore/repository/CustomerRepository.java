@@ -43,6 +43,23 @@ public class CustomerRepository {
 	private void closeConnection() {
 		this.client.close();
 	}
+	
+	public void createCollection() {
+		openConnection();
+		database.createCollection("customers");
+		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
+		IndexOptions indexOptions = new IndexOptions().unique(true);
+	    String resultCreateIndex = customers.createIndex(Indexes.ascending("email.email"), indexOptions);
+	    System.out.println(resultCreateIndex);
+	    closeConnection();
+	}
+	
+	public void dropCollection() {
+		openConnection();
+		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
+		customers.drop();		
+		closeConnection();		
+	}
 
 	public Customer findByEmailAddress(EmailAddress email) {
 		openConnection();
@@ -56,16 +73,6 @@ public class CustomerRepository {
 		return customer;
 	}
 	
-	public void createCollection() {
-		openConnection();
-		database.createCollection("customers");
-		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
-		IndexOptions indexOptions = new IndexOptions().unique(true);
-	    String resultCreateIndex = customers.createIndex(Indexes.ascending("email.email"), indexOptions);
-	    System.out.println(resultCreateIndex);
-	    closeConnection();
-	}
-
 	public Customer save(Customer customer) {
 
 		openConnection();
@@ -80,12 +87,5 @@ public class CustomerRepository {
 
 		closeConnection();
 		return customer;
-	}
-	
-	public void dropCollection() {
-		openConnection();
-		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
-		customers.drop();		
-		closeConnection();		
 	}
 }

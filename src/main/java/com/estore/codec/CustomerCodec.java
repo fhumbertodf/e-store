@@ -99,7 +99,6 @@ public class CustomerCodec implements CollectibleCodec<Customer> {
 		if (!documentHasId(document)) {
 			throw new IllegalStateException("Esse Document nao tem id");
 		}
-
 		return new BsonString(document.getId().toString(16));
 	}
 
