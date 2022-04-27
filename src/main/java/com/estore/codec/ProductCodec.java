@@ -35,8 +35,10 @@ public class ProductCodec implements CollectibleCodec<Product> {
 		Document document = new Document();
 		document.put("_id", new ObjectId(id.toString(16)));
 		document.put("name", name);
-		document.put("description", description);
-		document.put("price", price);
+		if(description != null) {
+			document.put("description", description);
+		}
+		document.put("price", price.doubleValue());
 
 		Map<String, String> attributes = value.getAttributes();
 		if (!attributes.isEmpty()) {
