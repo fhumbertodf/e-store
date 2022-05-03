@@ -1,15 +1,19 @@
 package com.estore.component;
 
 import static com.estore.util.CoreMatchers.named;
+import static com.estore.util.CoreMatchers.with;
+import static com.estore.util.OrderMatchers.LineItem;
+import static com.estore.util.OrderMatchers.Product;
+import static com.estore.util.OrderMatchers.containsOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -23,8 +27,11 @@ import org.springframework.stereotype.Component;
 import com.estore.domain.Address;
 import com.estore.domain.Customer;
 import com.estore.domain.EmailAddress;
+import com.estore.domain.LineItem;
+import com.estore.domain.Order;
 import com.estore.domain.Product;
 import com.estore.repository.CustomerRepository;
+import com.estore.repository.OrderRepository;
 import com.estore.repository.ProductRepository;
 
 @Component
@@ -35,6 +42,9 @@ public class DataLoader implements CommandLineRunner {
 
 	@Autowired
 	private ProductRepository productRepository;
+	
+	@Autowired
+	private OrderRepository orderRepository;
 
 	@Override
 	public void run(String... strings) throws Exception {
@@ -43,11 +53,17 @@ public class DataLoader implements CommandLineRunner {
 		customerRepository.createCollection();
 		productRepository.dropCollection();
 		productRepository.createCollection();
+		
+		orderRepository.dropCollection();
+		orderRepository.createCollection();
+		
+		Address address1 = new Address("28 Broadway", "New York", "United States");
+		Address address2 = new Address("28 Broadway", "New York", "United States");
 
 		Customer dave = new Customer("Dave", "Matthews");
 		dave.setEmailAddress(new EmailAddress("dave@dmband.com"));
-		dave.add(new Address("28 Broadway", "New York", "United States"));
-		dave.add(new Address("29 Broadway", "New York", "United States"));
+		dave.add(address1);
+		dave.add(address2);
 
 		customerRepository.save(dave);
 
@@ -94,14 +110,26 @@ public class DataLoader implements CommandLineRunner {
 		assertThat(page.isLast(), is(false));
 		assertThat(page.hasNext(), is(true));
 		
-		Pageable pageable2 = PageRequest.of(0, 2, Sort.by(Direction.DESC, "name"));
-		Page<Product> page2 = productRepository.findByDescriptionContaining("Apple", pageable2);
-		
-		assertThat(page2.getContent(), hasSize(2));
-		assertEquals(page2.getContent().get(0).getName(), "iPad");		
-
 		List<Product> products = productRepository.findByAttributes("attributes.connector", "plug");
 		assertThat(products, Matchers.<Product>hasItems(named("Dock")));
+		
+		Order order1 = new Order(dave, address1);
+		order1.add(new LineItem(iPad, 2));
+		order1.add(new LineItem(macBook, 1));
+		
+		orderRepository.insert(order1);
+		
+		Order order2 = new Order(dave, address2);
+		order2.add(new LineItem(iPad));
+
+		order2 = orderRepository.save(order2);
+		assertThat(order2.getId(), is(notNullValue()));
+		
+		List<Order> orders = orderRepository.findByCustomer(dave);
+		Matcher<Iterable<? super Order>> hasOrderForiPad = containsOrder(with(LineItem(with(Product(named("iPad"))))));
+
+		assertThat(orders, hasSize(1));
+		assertThat(orders, hasOrderForiPad);
 
 	}
 }

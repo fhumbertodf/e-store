@@ -21,10 +21,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>			
+		</dependency>
+
 		<dependency>
 			<groupId>org.mongodb</groupId>
-			<artifactId>mongodb-driver</artifactId>			
+			<artifactId>mongodb-driver</artifactId>
 		</dependency>
 
 		<dependency>
@@ -39,16 +44,16 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Test --> 
+		<!-- Test -->
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>			
+			<artifactId>hamcrest-library</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit-dep</artifactId>
-			<version>4.10</version>			
+			<version>4.10</version>
 		</dependency>
 	</dependencies>
 

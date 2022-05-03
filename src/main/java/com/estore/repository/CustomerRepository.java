@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import com.estore.codec.CustomerCodec;
 import com.estore.domain.Customer;
 import com.estore.domain.EmailAddress;
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.client.MongoCollection;
@@ -25,10 +24,8 @@ public class CustomerRepository {
 	private MongoClient client;
 	private MongoDatabase database;
 
-	private void openConnection() {
-		
+	private void openConnection() {		
 		Codec<Document> codec = MongoClient.getDefaultCodecRegistry().get(Document.class);
-
 		CustomerCodec CustomerCodec = new CustomerCodec(codec);
 
 		CodecRegistry registro = CodecRegistries.fromRegistries(MongoClient.getDefaultCodecRegistry(),
@@ -46,18 +43,21 @@ public class CustomerRepository {
 	
 	public void createCollection() {
 		openConnection();
+		
 		database.createCollection("customers");
 		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
 		IndexOptions indexOptions = new IndexOptions().unique(true);
-	    String resultCreateIndex = customers.createIndex(Indexes.ascending("email.email"), indexOptions);
-	    System.out.println(resultCreateIndex);
+	    customers.createIndex(Indexes.ascending("email.email"), indexOptions);
+	    	    
 	    closeConnection();
 	}
 	
 	public void dropCollection() {
 		openConnection();
+		
 		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
-		customers.drop();		
+		customers.drop();	
+		
 		closeConnection();		
 	}
 
@@ -68,23 +68,16 @@ public class CustomerRepository {
 		MongoCursor<Customer> results = customers.find(Filters.eq("email.email", email.toString())).iterator();
 		Customer customer = results.hasNext() ? results.next() : null;
 		
-		closeConnection();
-		
+		closeConnection();		
 		return customer;
 	}
 	
 	public Customer save(Customer customer) {
-
 		openConnection();
+		
 		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
-		MongoCursor<Customer> results = customers.find(Filters.eq("email", customer.getEmailAddress().toString())).iterator();
-		Customer result = results.hasNext() ? results.next() : null;
-		if (result == null) {
-			customers.insertOne(customer);
-		} else {
-			throw new DuplicateKeyException(null, null, null);
-		}
-
+		customers.insertOne(customer);
+		
 		closeConnection();
 		return customer;
 	}
