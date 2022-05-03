@@ -48,15 +48,11 @@ public class DataLoader implements CommandLineRunner {
 
 	@Override
 	public void run(String... strings) throws Exception {
+		
+		customerRepository.deleteAll();
+		productRepository.deleteAll();
+		orderRepository.deleteAll();
 
-		customerRepository.dropCollection();
-		customerRepository.createCollection();
-		productRepository.dropCollection();
-		productRepository.createCollection();
-		
-		orderRepository.dropCollection();
-		orderRepository.createCollection();
-		
 		Address address1 = new Address("28 Broadway", "New York", "United States");
 		Address address2 = new Address("28 Broadway", "New York", "United States");
 
@@ -66,7 +62,7 @@ public class DataLoader implements CommandLineRunner {
 		dave.add(address2);
 
 		customerRepository.save(dave);
-
+		
 		Customer alicia = new Customer("Alicia", "Keys");
 		alicia.setEmailAddress(new EmailAddress("alicia@keys.com"));
 		alicia.add(new Address("27 Broadway", "New York", "United States"));
@@ -113,17 +109,12 @@ public class DataLoader implements CommandLineRunner {
 		List<Product> products = productRepository.findByAttributes("attributes.connector", "plug");
 		assertThat(products, Matchers.<Product>hasItems(named("Dock")));
 		
-		Order order1 = new Order(dave, address1);
-		order1.add(new LineItem(iPad, 2));
-		order1.add(new LineItem(macBook, 1));
+		Order order = new Order(dave, address1);
+		order.add(new LineItem(iPad));
 		
-		orderRepository.insert(order1);
+		orderRepository.save(order);
 		
-		Order order2 = new Order(dave, address2);
-		order2.add(new LineItem(iPad));
-
-		order2 = orderRepository.save(order2);
-		assertThat(order2.getId(), is(notNullValue()));
+		assertThat(order.getId(), is(notNullValue()));
 		
 		List<Order> orders = orderRepository.findByCustomer(dave);
 		Matcher<Iterable<? super Order>> hasOrderForiPad = containsOrder(with(LineItem(with(Product(named("iPad"))))));

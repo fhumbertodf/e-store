@@ -1,18 +1,30 @@
 package com.estore.domain;
 
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.util.Assert;
 
+/**
+ * A customer.
+ * 
+ * @author Oliver Gierke
+ */
+@Document(collection = "customers")
 public class Customer {
 
-	private BigInteger id;
+	@Id
+	private String id;
 
 	private String firstname, lastname;
 
+	@Field("email")
+	@Indexed(unique = true)
 	private EmailAddress emailAddress;
 	private Set<Address> addresses = new HashSet<Address>();
 
@@ -53,6 +65,15 @@ public class Customer {
 	 */
 	public String getFirstname() {
 		return firstname;
+	}
+
+	/**
+	 * Sets the firstname of the {@link Customer}.
+	 * 
+	 * @param firstname
+	 */
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
 	}
 
 	/**
@@ -105,13 +126,17 @@ public class Customer {
 	 * 
 	 * @return the id
 	 */
-	public BigInteger getId() {
+	public String getId() {
 		return id;
 	}
-	
-	public Customer setId(BigInteger id) {
-		this.id = id;	
-		return this;
+
+	/**
+	 * Sets the id of the {@link Customer}.
+	 * 
+	 * @param id
+	 */
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	/*

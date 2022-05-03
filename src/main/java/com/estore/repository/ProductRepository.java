@@ -1,123 +1,36 @@
 package com.estore.repository;
 
-import static com.mongodb.client.model.Sorts.ascending;
-import static com.mongodb.client.model.Sorts.descending;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import org.bson.Document;
-import org.bson.codecs.Codec;
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.configuration.CodecRegistry;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
-import com.estore.codec.ProductCodec;
 import com.estore.domain.Product;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
 
-@Repository
-public class ProductRepository {
+/**
+ * Repository interface to access {@link Product}s.
+ * 
+ * @author Oliver Gierke
+ */
+public interface ProductRepository extends MongoRepository<Product, Long> {
 
-	private MongoClient client;
-	private MongoDatabase database;
+	/**
+	 * Returns a {@link Page} of {@link Product}s having a description which contains the given snippet.
+	 * 
+	 * @param description
+	 * @param pageable
+	 * @return
+	 */
+	Page<Product> findByDescriptionContaining(String description, Pageable pageable);
 
-	private void openConnection() {
-		Codec<Document> codec = MongoClient.getDefaultCodecRegistry().get(Document.class);
-		ProductCodec ProductCodec = new ProductCodec(codec);
-
-		CodecRegistry registro = CodecRegistries.fromRegistries(MongoClient.getDefaultCodecRegistry(),
-				CodecRegistries.fromCodecs(ProductCodec));
-
-		MongoClientOptions opcoes = MongoClientOptions.builder().codecRegistry(registro).build();
-
-		this.client = new MongoClient("localhost:27017", opcoes);
-		this.database = client.getDatabase("e-store");
-	}
-
-	private void closeConnection() {
-		this.client.close();
-	}
-
-	public void createCollection() {
-		openConnection();
-		database.createCollection("products");		
-		closeConnection();
-	}
-
-	public void dropCollection() {
-		openConnection();
-		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
-		products.drop();
-		closeConnection();
-	}
-
-	public List<Product> findByAttributes(String fieldName, String value) {
-		openConnection();
-
-		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
-		MongoCursor<Product> results = products.find(Filters.eq(fieldName, value.toString())).iterator();
-		List<Product> result = new ArrayList<Product>();
-		while (results.hasNext()) {
-			result.add(results.next());
-		}
-
-		closeConnection();
-		return result;
-	}
-
-	public Page<Product> findByDescriptionContaining(String fieldName, Pageable pageable) {
-
-		Pattern pattern = Pattern.compile(fieldName, Pattern.CASE_INSENSITIVE);
-
-		Sort sort = pageable.getSort();
-		Direction direction = null;
-		List<String> names = new ArrayList<String>();
-		for (Order order : sort.toList()) {
-			direction = order.getDirection();
-			names.add(order.getProperty());
-		}
-
-		openConnection();
-
-		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
-		MongoCursor<Product> results;
-		if (Direction.ASC.equals(direction)) {
-			results = products.find(Filters.eq("description", pattern)).sort(ascending(names))
-					.limit(pageable.getPageSize()).skip(pageable.getPageNumber()).iterator();
-		} else {
-			results = products.find(Filters.eq("description", pattern)).sort(descending(names))
-					.limit(pageable.getPageSize()).skip(pageable.getPageNumber()).iterator();
-		}
-		Long count = products.countDocuments(Filters.eq("description", pattern));
-		List<Product> result = new ArrayList<Product>();
-		while (results.hasNext()) {
-			result.add(results.next());
-		}
-
-		closeConnection();
-		return new PageImpl<Product>(result, pageable, count);
-	}
-
-	public Product save(Product product) {
-		openConnection();
-		
-		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
-		products.insertOne(product);
-		
-		closeConnection();
-		return product;
-	}	
+	/**
+	 * Returns all {@link Product}s having the given attribute.
+	 * 
+	 * @param attribute
+	 * @return
+	 */
+	@Query("{ ?0 : ?1 }")
+	List<Product> findByAttributes(String key, String value);
 }

@@ -2,6 +2,11 @@ package com.estore.domain;
 
 import org.springframework.util.Assert;
 
+/**
+ * An address.
+ * 
+ * @author Oliver Gierke
+ */
 public class Address {
 
 	private final String street, city, country;

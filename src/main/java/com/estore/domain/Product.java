@@ -1,17 +1,26 @@
 package com.estore.domain;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.util.Assert;
 
+/**
+ * A product.
+ * 
+ * @author Oliver Gierke
+ */
+@Document(collection = "products")
 public class Product {
 	
-	private BigInteger id;
-	
+	@Id
+	private String id;
+
 	private String name, description;
 	private BigDecimal price;
 	private Map<String, String> attributes = new HashMap<String, String>();
@@ -33,6 +42,7 @@ public class Product {
 	 * @param price       must not be {@literal null} or less than or equal to zero.
 	 * @param description
 	 */
+	@PersistenceConstructor
 	public Product(String name, BigDecimal price, String description) {
 
 		Assert.hasText(name, "Name must not be null or empty!");
@@ -95,21 +105,25 @@ public class Product {
 	public BigDecimal getPrice() {
 		return price;
 	}
-	
+
 	/**
 	 * Returns the identifier of the document.
 	 * 
 	 * @return the id
 	 */
-	public BigInteger getId() {
+	public String getId() {
 		return id;
 	}
-	
-	public Product setId(BigInteger id) {
-		this.id = id;	
-		return this;
+
+	/**
+	 * Sets the id of the {@link Customer}.
+	 * 
+	 * @param id
+	 */
+	public void setId(String id) {
+		this.id = id;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

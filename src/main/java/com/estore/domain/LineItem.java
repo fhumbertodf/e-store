@@ -1,14 +1,20 @@
 package com.estore.domain;
 
+import java.math.BigDecimal;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.util.Assert;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
-public class LineItem {
+/**
+ * @author Oliver Gierke
+ */
+public class LineItem { 
 	
-	private BigInteger id;
+	@Id
+	private String id;
 
+	@DBRef
 	private Product product;
 	private BigDecimal price;
 	private int amount;
@@ -83,12 +89,47 @@ public class LineItem {
 	 * 
 	 * @return the id
 	 */
-	public BigInteger getId() {
+	public String getId() {
 		return id;
 	}
-	
-	public LineItem setId(BigInteger id) {
-		this.id = id;	
-		return this;
+
+	/**
+	 * Sets the id of the {@link Customer}.
+	 * 
+	 * @param id
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+
+		if (this.id == null || obj == null || !(this.getClass().equals(obj.getClass()))) {
+			return false;
+		}
+
+		LineItem that = (LineItem) obj;
+
+		return this.id.equals(that.getId());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return id == null ? 0 : id.hashCode();
 	}
 }

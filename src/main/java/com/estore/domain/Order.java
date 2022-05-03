@@ -1,17 +1,26 @@
 package com.estore.domain;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.util.Assert;
 
+/**
+ * @author Oliver Gierke
+ */
+@Document(collection = "orders")
 public class Order {
 	
-	private BigInteger id;
+	@Id
+	private String id;
 
+	@DBRef
 	private Customer customer;
 	private Address billingAddress;
 	private Address shippingAddress;
@@ -35,6 +44,7 @@ public class Order {
 	 * @param shippingAddress must not be {@literal null}.
 	 * @param billingAddress  can be {@literal null}.
 	 */
+	@PersistenceConstructor
 	public Order(Customer customer, Address shippingAddress, Address billingAddress) {
 
 		Assert.notNull(customer, "");
@@ -111,15 +121,19 @@ public class Order {
 	 * 
 	 * @return the id
 	 */
-	public BigInteger getId() {
+	public String getId() {
 		return id;
 	}
-	
-	public Order setId(BigInteger id) {
-		this.id = id;	
-		return this;
+
+	/**
+	 * Sets the id of the {@link Customer}.
+	 * 
+	 * @param id
+	 */
+	public void setId(String id) {
+		this.id = id;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -136,7 +150,7 @@ public class Order {
 			return false;
 		}
 
-		Customer that = (Customer) obj;
+		Order that = (Order) obj;
 
 		return this.id.equals(that.getId());
 	}
