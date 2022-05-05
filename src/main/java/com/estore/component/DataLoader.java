@@ -42,13 +42,13 @@ public class DataLoader implements CommandLineRunner {
 
 	@Autowired
 	private ProductRepository productRepository;
-	
+
 	@Autowired
 	private OrderRepository orderRepository;
 
 	@Override
 	public void run(String... strings) throws Exception {
-		
+
 		customerRepository.deleteAll();
 		productRepository.deleteAll();
 		orderRepository.deleteAll();
@@ -62,7 +62,7 @@ public class DataLoader implements CommandLineRunner {
 		dave.add(address2);
 
 		customerRepository.save(dave);
-		
+
 		Customer alicia = new Customer("Alicia", "Keys");
 		alicia.setEmailAddress(new EmailAddress("alicia@keys.com"));
 		alicia.add(new Address("27 Broadway", "New York", "United States"));
@@ -105,17 +105,18 @@ public class DataLoader implements CommandLineRunner {
 		assertThat(page.isFirst(), is(true));
 		assertThat(page.isLast(), is(false));
 		assertThat(page.hasNext(), is(true));
-		
+
 		List<Product> products = productRepository.findByAttributes("attributes.connector", "plug");
 		assertThat(products, Matchers.<Product>hasItems(named("Dock")));
-		
+
 		Order order = new Order(dave, address1);
-		order.add(new LineItem(iPad));
-		
+		order.add(new LineItem(iPad, 2));
+		order.add(new LineItem(macBook, 1));
+
 		orderRepository.save(order);
-		
+
 		assertThat(order.getId(), is(notNullValue()));
-		
+
 		List<Order> orders = orderRepository.findByCustomer(dave);
 		Matcher<Iterable<? super Order>> hasOrderForiPad = containsOrder(with(LineItem(with(Product(named("iPad"))))));
 
