@@ -63,6 +63,17 @@ public class CustomerRepository {
 		return customer;
 	}
 	
+	public Customer findById(String id) {
+		openConnection();
+		
+		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
+		MongoCursor<Customer> results = customers.find(Filters.eq("id", id)).iterator();
+		Customer customer = results.hasNext() ? results.next() : null;
+		
+		closeConnection();		
+		return customer;
+	}
+	
 	public Customer insert(Customer customer) {
 		openConnection();
 		

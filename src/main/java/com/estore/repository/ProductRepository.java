@@ -70,7 +70,7 @@ public class ProductRepository {
 		closeConnection();
 		return result;
 	}
-
+	
 	public Page<Product> findByDescriptionContaining(String fieldName, Pageable pageable) {
 
 		Pattern pattern = Pattern.compile(fieldName, Pattern.CASE_INSENSITIVE);
@@ -102,6 +102,17 @@ public class ProductRepository {
 
 		closeConnection();
 		return new PageImpl<Product>(result, pageable, count);
+	}
+	
+	public Product findById(String id) {
+		openConnection();
+
+		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
+		MongoCursor<Product> results = products.find(Filters.eq("id", id)).iterator();
+		Product product = results.hasNext() ? results.next() : null;
+		
+		closeConnection();		
+		return product;
 	}
 
 	public Product insert(Product product) {

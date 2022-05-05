@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.estore.codec.OrderCodec;
@@ -23,13 +24,19 @@ import com.mongodb.client.model.Filters;
 
 @Repository
 public class OrderRepository {
+	
+	@Autowired
+	private CustomerRepository customerRepository;
+
+	@Autowired
+	private ProductRepository productRepository;
 
 	private MongoClient client;
 	private MongoDatabase database;
 
 	private void openConnection() {
 		Codec<Document> codec = MongoClient.getDefaultCodecRegistry().get(Document.class);
-		OrderCodec OrderCodec = new OrderCodec(codec);
+		OrderCodec OrderCodec = new OrderCodec(codec, customerRepository, productRepository);
 
 		CodecRegistry registro = CodecRegistries.fromRegistries(MongoClient.getDefaultCodecRegistry(),
 				CodecRegistries.fromCodecs(OrderCodec));

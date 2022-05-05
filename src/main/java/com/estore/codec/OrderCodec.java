@@ -21,14 +21,23 @@ import com.estore.domain.Address;
 import com.estore.domain.Customer;
 import com.estore.domain.LineItem;
 import com.estore.domain.Order;
+import com.estore.domain.Product;
+import com.estore.repository.CustomerRepository;
+import com.estore.repository.ProductRepository;
 import com.mongodb.DBRef;
 
 public class OrderCodec implements CollectibleCodec<Order> {
 
 	private Codec<Document> codec;
+	
+	private CustomerRepository customerRepository;
 
-	public OrderCodec(Codec<Document> codec) {
+	private ProductRepository productRepository;
+
+	public OrderCodec(Codec<Document> codec, CustomerRepository customerRepository, ProductRepository productRepository) {
 		this.codec = codec;
+		this.customerRepository = customerRepository;
+		this.productRepository = productRepository;
 	}
 
 	@Override
@@ -72,11 +81,10 @@ public class OrderCodec implements CollectibleCodec<Order> {
 	public Order decode(BsonReader reader, DecoderContext decoderContext) {
 		Document document = codec.decode(reader, decoderContext);
 
-		DBRef dbref = (DBRef) document.get("customer");
-		Customer customer = new Customer("-","-").setId(new BigInteger(dbref.getId().toString(), 16));
-
+		DBRef dbrefCustomer = (DBRef) document.get("customer");		
+		Customer customer = customerRepository.findById(dbrefCustomer.getId().toString());
+		
 		Document shippingAddressDocument = (Document) document.get("shippingAddress");
-
 		Address shippingAddress = new Address(shippingAddressDocument.getString("street"),
 				shippingAddressDocument.getString("city"), shippingAddressDocument.getString("country"));
 
@@ -88,6 +96,16 @@ public class OrderCodec implements CollectibleCodec<Order> {
 		}
 
 		Order order = new Order(customer, shippingAddress, billingAddress);
+		
+		List<Document> lineItemsDocument = (List<Document>) document.getList("lineItems", Document.class);
+		for (Document documentLineItem : lineItemsDocument) {
+			
+			DBRef dbrefProduct = (DBRef) documentLineItem.get("product");		
+			Product product = productRepository.findById(dbrefProduct.getId().toString());
+			
+			LineItem lineItem = new LineItem(product, documentLineItem.getInteger("amount"));
+			order.add(lineItem);
+		}
 
 		return order;
 	}

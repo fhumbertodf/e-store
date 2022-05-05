@@ -1,14 +1,11 @@
 package com.estore.domain;
 
-import org.springframework.util.Assert;
-
 import java.math.BigDecimal;
-import java.math.BigInteger;
+
+import org.springframework.util.Assert;
 
 public class LineItem {
 	
-	private BigInteger id;
-
 	private Product product;
 	private BigDecimal price;
 	private int amount;
@@ -76,19 +73,5 @@ public class LineItem {
 	 */
 	public BigDecimal getTotal() {
 		return price.multiply(BigDecimal.valueOf(amount));
-	}
-	
-	/**
-	 * Returns the identifier of the document.
-	 * 
-	 * @return the id
-	 */
-	public BigInteger getId() {
-		return id;
-	}
-	
-	public LineItem setId(BigInteger id) {
-		this.id = id;	
-		return this;
-	}
+	}	
 }
