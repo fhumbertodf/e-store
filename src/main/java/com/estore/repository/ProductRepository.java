@@ -57,13 +57,6 @@ public class ProductRepository {
 		closeConnection();
 	}
 
-	public void dropCollection() {
-		openConnection();
-		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
-		products.drop();
-		closeConnection();
-	}
-
 	public List<Product> findByAttributes(String fieldName, String value) {
 		openConnection();
 
@@ -111,7 +104,7 @@ public class ProductRepository {
 		return new PageImpl<Product>(result, pageable, count);
 	}
 
-	public Product save(Product product) {
+	public Product insert(Product product) {
 		openConnection();
 		
 		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
@@ -119,5 +112,12 @@ public class ProductRepository {
 		
 		closeConnection();
 		return product;
-	}	
+	}
+	
+	public void deleteAll() {
+		openConnection();
+		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
+		products.deleteMany(new Document());
+		closeConnection();
+	}
 }

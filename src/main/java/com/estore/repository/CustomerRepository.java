@@ -47,20 +47,11 @@ public class CustomerRepository {
 		database.createCollection("customers");
 		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
 		IndexOptions indexOptions = new IndexOptions().unique(true);
-	    customers.createIndex(Indexes.ascending("email.email"), indexOptions);
+	    customers.createIndex(Indexes.ascending("email"), indexOptions);
 	    	    
 	    closeConnection();
 	}
 	
-	public void dropCollection() {
-		openConnection();
-		
-		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
-		customers.drop();	
-		
-		closeConnection();		
-	}
-
 	public Customer findByEmailAddress(EmailAddress email) {
 		openConnection();
 		
@@ -72,7 +63,7 @@ public class CustomerRepository {
 		return customer;
 	}
 	
-	public Customer save(Customer customer) {
+	public Customer insert(Customer customer) {
 		openConnection();
 		
 		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
@@ -80,5 +71,14 @@ public class CustomerRepository {
 		
 		closeConnection();
 		return customer;
+	}
+	
+	public void deleteAll() {
+		openConnection();
+		
+		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
+		customers.deleteMany(new Document());
+				
+		closeConnection();		
 	}
 }

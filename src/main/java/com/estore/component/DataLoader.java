@@ -49,13 +49,13 @@ public class DataLoader implements CommandLineRunner {
 	@Override
 	public void run(String... strings) throws Exception {
 
-		customerRepository.dropCollection();
-		customerRepository.createCollection();
-		productRepository.dropCollection();
-		productRepository.createCollection();
+		customerRepository.deleteAll();
+		//customerRepository.createCollection();
+		productRepository.deleteAll();
+		//productRepository.createCollection();
 		
-		orderRepository.dropCollection();
-		orderRepository.createCollection();
+		orderRepository.deleteAll();
+		//orderRepository.createCollection();
 		
 		Address address1 = new Address("28 Broadway", "New York", "United States");
 		Address address2 = new Address("28 Broadway", "New York", "United States");
@@ -65,13 +65,13 @@ public class DataLoader implements CommandLineRunner {
 		dave.add(address1);
 		dave.add(address2);
 
-		customerRepository.save(dave);
+		customerRepository.insert(dave);
 
 		Customer alicia = new Customer("Alicia", "Keys");
 		alicia.setEmailAddress(new EmailAddress("alicia@keys.com"));
 		alicia.add(new Address("27 Broadway", "New York", "United States"));
 
-		Customer result = customerRepository.save(alicia);
+		Customer result = customerRepository.insert(alicia);
 		assertThat(result.getId(), is(notNullValue()));
 
 		result = customerRepository.findByEmailAddress(result.getEmailAddress());
@@ -82,24 +82,24 @@ public class DataLoader implements CommandLineRunner {
 		anotherDave.add(new Address("Broadway", "New York", "United States"));
 
 		try {
-			customerRepository.save(anotherDave);
+			customerRepository.insert(anotherDave);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 
 		Product iPad = new Product("iPad", BigDecimal.valueOf(499.0), "Apple tablet device");
 		iPad.setAttribute("connector", "plug");
-		productRepository.save(iPad);
+		productRepository.insert(iPad);
 
 		Product macBook = new Product("MacBook Pro", BigDecimal.valueOf(1299.0), "Apple notebook");
-		productRepository.save(macBook);
+		productRepository.insert(macBook);
 
 		Product dock = new Product("Dock", BigDecimal.valueOf(49.0), "Dock for iPhone/iPad");
 		dock.setAttribute("connector", "plug");
-		productRepository.save(dock);
+		productRepository.insert(dock);
 
 		Product product = new Product("Camera bag", BigDecimal.valueOf(49.99));
-		product = productRepository.save(product);
+		product = productRepository.insert(product);
 
 		Pageable pageable = PageRequest.of(0, 1, Sort.by(Direction.DESC, "name"));
 		Page<Product> page = productRepository.findByDescriptionContaining("Apple", pageable);
@@ -113,17 +113,13 @@ public class DataLoader implements CommandLineRunner {
 		List<Product> products = productRepository.findByAttributes("attributes.connector", "plug");
 		assertThat(products, Matchers.<Product>hasItems(named("Dock")));
 		
-		Order order1 = new Order(dave, address1);
-		order1.add(new LineItem(iPad, 2));
-		order1.add(new LineItem(macBook, 1));
+		Order order = new Order(dave, address1);
+		order.add(new LineItem(iPad, 2));
+		order.add(new LineItem(macBook, 1));
 		
-		orderRepository.insert(order1);
+		orderRepository.insert(order);
 		
-		Order order2 = new Order(dave, address2);
-		order2.add(new LineItem(iPad));
-
-		order2 = orderRepository.save(order2);
-		assertThat(order2.getId(), is(notNullValue()));
+		assertThat(order.getId(), is(notNullValue()));
 		
 		List<Order> orders = orderRepository.findByCustomer(dave);
 		Matcher<Iterable<? super Order>> hasOrderForiPad = containsOrder(with(LineItem(with(Product(named("iPad"))))));

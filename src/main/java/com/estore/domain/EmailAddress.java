@@ -8,7 +8,7 @@ public class EmailAddress {
 	private static final String EMAIL_REGEX = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 	private static final Pattern PATTERN = Pattern.compile(EMAIL_REGEX);
 
-	private final String value;
+	private final String email;
 
 	/**
 	 * Creates a new {@link EmailAddress} from the given {@link String}
@@ -16,9 +16,9 @@ public class EmailAddress {
 	 * 
 	 * @param emailAddress must not be {@literal null} or empty.
 	 */
-	public EmailAddress(String emailAddress) {
-		Assert.isTrue(isValid(emailAddress), "Invalid email address!");
-		this.value = emailAddress;
+	public EmailAddress(String email) {
+		Assert.isTrue(isValid(email), "Invalid email address!");
+		this.email = email;
 	}
 
 	/**
@@ -32,6 +32,15 @@ public class EmailAddress {
 		return candidate == null ? false : PATTERN.matcher(candidate).matches();
 	}
 
+	/**
+	 * Returns the email.
+	 * 
+	 * @return
+	 */
+	public String getEmail() {
+		return email;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -39,7 +48,7 @@ public class EmailAddress {
 	 */
 	@Override
 	public String toString() {
-		return value;
+		return email;
 	}
 
 	/*
@@ -59,7 +68,7 @@ public class EmailAddress {
 		}
 
 		EmailAddress that = (EmailAddress) obj;
-		return this.value.equals(that.value);
+		return this.email.equals(that.email);
 	}
 
 	/*
@@ -69,6 +78,6 @@ public class EmailAddress {
 	 */
 	@Override
 	public int hashCode() {
-		return value.hashCode();
+		return email.hashCode();
 	}
 }

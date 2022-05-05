@@ -41,7 +41,6 @@ public class OrderCodec implements CollectibleCodec<Order> {
 		BigDecimal total = value.getTotal();
 
 		Document document = new Document();
-
 		document.put("_id", new ObjectId(id.toString(16)));
 		document.put("shippingAddress", new Document("street", shippingAddress.getStreet())
 				.append("city", shippingAddress.getCity()).append("country", shippingAddress.getCountry()));
@@ -49,17 +48,17 @@ public class OrderCodec implements CollectibleCodec<Order> {
 					.append("city", billingAddress.getCity()).append("country", billingAddress.getCountry()));
 		
 		document.put("total", total.doubleValue());
+		document.put("customer", new DBRef("customers", new ObjectId(customer.getId().toString(16)))); 
 
 		if (lineItems != null) {
 			List<Document> lineItemsDocument = new ArrayList<>();
 			for (LineItem lineItem : lineItems) {
-				lineItemsDocument.add(new Document("id", lineItem.getId())
-						.append("price", lineItem.getUnitPrice().doubleValue()).append("amount", lineItem.getAmount())
-						.append("product", new ObjectId(lineItem.getProduct().getId().toString(16))));
+				lineItemsDocument.add(new Document("price", lineItem.getUnitPrice().doubleValue())
+						.append("amount", lineItem.getAmount())
+						.append("product", new DBRef("products", new ObjectId(lineItem.getProduct().getId().toString(16)))));
 			}
 			document.put("lineItems", lineItemsDocument);
-		}
-		document.put("customer", new DBRef("customer", new ObjectId(customer.getId().toString(16))));
+		}		
 
 		codec.encode(writer, document, encoderContext);
 	}
@@ -74,7 +73,7 @@ public class OrderCodec implements CollectibleCodec<Order> {
 		Document document = codec.decode(reader, decoderContext);
 
 		DBRef dbref = (DBRef) document.get("customer");
-		Customer customer = new Customer("", "").setId(new BigInteger(dbref.getId().toString(), 16));
+		Customer customer = new Customer("-","-").setId(new BigInteger(dbref.getId().toString(), 16));
 
 		Document shippingAddressDocument = (Document) document.get("shippingAddress");
 
