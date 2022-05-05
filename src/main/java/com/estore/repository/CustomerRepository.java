@@ -4,6 +4,7 @@ import org.bson.Document;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Repository;
 
 import com.estore.codec.CustomerCodec;
@@ -67,9 +68,8 @@ public class CustomerRepository {
 		openConnection();
 		
 		MongoCollection<Customer> customers = this.database.getCollection("customers", Customer.class);
-		MongoCursor<Customer> results = customers.find(Filters.eq("id", id)).iterator();
-		Customer customer = results.hasNext() ? results.next() : null;
-		
+		Customer customer = customers.find(Filters.eq("_id", new ObjectId(id))).first();
+				
 		closeConnection();		
 		return customer;
 	}

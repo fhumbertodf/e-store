@@ -61,8 +61,6 @@ public class OrderRepository {
 		openConnection();
 
 		MongoCollection<Order> orders = this.database.getCollection("orders", Order.class);
-		// MongoCursor<Order> results = orders.find(Filters.eq("customer.$id",
-		// customer.getId().toString(16))).iterator();
 		MongoCursor<Order> results = orders.find(Filters.eq("customer", new DBRef("customers", new ObjectId(customer.getId().toString(16))))).iterator();
 		List<Order> result = new ArrayList<Order>();
 		while (results.hasNext()) {

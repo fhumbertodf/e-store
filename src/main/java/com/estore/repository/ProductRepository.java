@@ -11,6 +11,7 @@ import org.bson.Document;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -108,9 +109,8 @@ public class ProductRepository {
 		openConnection();
 
 		MongoCollection<Product> products = this.database.getCollection("products", Product.class);
-		MongoCursor<Product> results = products.find(Filters.eq("id", id)).iterator();
-		Product product = results.hasNext() ? results.next() : null;
-		
+		Product product = products.find(Filters.eq("_id", new ObjectId(id))).first();
+		 		
 		closeConnection();		
 		return product;
 	}
